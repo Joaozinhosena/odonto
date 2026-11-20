@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="pt-BR" class="scroll-smooth" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta id="theme-color-meta" name="theme-color" content="#fffefa">
+  <meta name="description" content="DR ODONTO — odontologia especializada com atendimento atento, planejamento individual e cuidado em cada detalhe.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="DR ODONTO | Odontologia especializada">
+  <meta property="og:description" content="Um cuidado atento. Um sorriso com confiança.">
+  <title>{{ clinic_name }} | Odontologia especializada</title>
+
+  <!-- Restaura a escolha visual antes da primeira pintura da página. -->
+  <script>
+    try { document.documentElement.dataset.theme = localStorage.getItem('dr-odonto-theme') === 'dark' ? 'dark' : 'light'; }
+    catch (error) { document.documentElement.dataset.theme = 'light'; }
+  </script>
+  <!-- Tailwind via CDN: todo o visual permanece neste HTML, sem CSS externo. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pine: 'var(--color-ink)',
+            pineDeep: 'var(--color-deep)',
+            pineSoft: 'var(--color-ink-soft)',
+            brass: 'var(--color-gold)',
+            brassLight: 'var(--color-gold-light)',
+            paper: 'var(--color-paper)',
+            linen: 'var(--color-linen)',
+            graphite: 'var(--color-ink)',
+            muted: 'var(--color-muted)',
+            surface: 'var(--color-surface)',
+            surfaceAlt: 'var(--color-surface-alt)',
+            deep: 'var(--color-deep)',
+            action: 'var(--action-bg)',
+            actionText: 'var(--action-text)',
+            actionHover: 'var(--action-hover)'
+          },
+          fontFamily: {
+            sans: ['Manrope', 'ui-sans-serif', 'system-ui'],
+            display: ['Cormorant Garamond', 'Georgia', 'serif']
+          },
+          boxShadow: {
+            card: '0 24px 70px rgba(24, 20, 12, .10)',
+            float: '0 14px 45px rgba(0, 0, 0, .14)'
+          },
+          letterSpacing: {
+            micro: '.18em'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root, html[data-theme="light"] {
+      color-scheme: light;
+      --color-paper: #fffefa;
+      --color-linen: #f5f1e7;
+      --color-surface: #ffffff;
+      --color-surface-alt: #fbf7e9;
+      --color-ink: #28251f;
+      --color-ink-soft: #514b40;
+      --color-deep: #12110f;
+      --color-muted: #777166;
+      --color-gold: #c69b25;
+      --color-gold-light: #e8c24e;
+      --action-bg: #211f1a;
+      --action-text: #fffdf7;
+      --action-hover: #080807;
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --color-paper: #10100f;
+      --color-linen: #191815;
+      --color-surface: #1e1c18;
+      --color-surface-alt: #272319;
+      --color-ink: #f4f0e6;
+      --color-ink-soft: #ddd4c2;
+      --color-deep: #050505;
+      --color-muted: #b4ad9f;
+      --color-gold: #e5b72d;
+      --color-gold-light: #f4d46c;
+      --action-bg: #e5b72d;
+      --action-text: #18150d;
+      --action-hover: #f2c94d;
+    }
+    html { scroll-padding-top: 92px; background: var(--color-paper); }
+    body { -webkit-font-smoothing: antialiased; background: var(--color-paper); color: var(--color-ink); }
+    ::selection { background: var(--color-gold-light); color: #17140c; }
+    .hero-image { background-image: linear-gradient(180deg, rgba(16,16,15,.02), rgba(16,16,15,.28)), url('https://images.unsplash.com/photo-1685022036266-7db6e5161ee1?auto=format&fit=crop&w=1800&q=85'); }
+    .clinic-image { background-image: url('https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1400&q=85'); }
+    .doctor-image { background-image: url('https://images.unsplash.com/photo-1770134223774-13b735e29201?auto=format&fit=crop&w=1200&q=85'); }
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.is-visible { opacity: 1; transform: translateY(0); }
+    .nav-glass { background: color-mix(in srgb, var(--color-paper) 92%, transparent); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+    .image-grain { background-image: linear-gradient(135deg, rgba(20,18,12,.10), transparent 48%), radial-gradient(rgba(255,255,255,.18) .7px, transparent .7px); background-size: auto, 5px 5px; }
+    .theme-choice[aria-pressed="true"] { background: var(--color-gold); color: #17140c; border-color: var(--color-gold); box-shadow: 0 3px 12px rgba(0,0,0,.09); }
+    .theme-choice:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-gold) 55%, transparent); outline-offset: 3px; }
+    details summary::-webkit-details-marker { display: none; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body class="bg-paper font-sans text-graphite antialiased">
+  <!-- Faixa institucional -->
+  <div class="hidden bg-pineDeep text-white/75 md:block">
+    <div class="mx-auto flex max-w-[1440px] items-center justify-between px-8 py-2.5 text-[10px] font-semibold uppercase tracking-[.17em] xl:px-14">
+      <span class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-brassLight"></span> Cuidado odontológico com atenção em cada detalhe</span>
+      <div class="flex items-center gap-6">
+        {% if clinic_phone %}<a href="tel:{{ clinic_phone|replace(' ', '')|replace('(', '')|replace(')', '')|replace('-', '') }}" class="transition hover:text-brassLight">{{ clinic_phone }}</a>{% endif %}
+        <span class="text-white/25">DR ODONTO · {{ clinic_tagline }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navegação -->
+  <header id="site-header" class="sticky top-0 z-50 border-b border-pine/8 bg-paper/95 transition-shadow duration-300">
+    <div class="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-3.5 sm:px-8 lg:px-14">
+      <a href="#inicio" class="group flex items-center gap-3" aria-label="{{ clinic_name }} — início">
+        <span class="flex h-[48px] w-[112px] items-center justify-center overflow-hidden rounded-xl bg-surface/80 ring-1 ring-pine/5 sm:h-[54px] sm:w-[126px]">
+          <img src="{{ url_for('static', filename='images/logo-dr-odonto.jpg') }}" alt="Logo {{ clinic_name }}" class="h-full w-full object-cover object-center" loading="eager">
+        </span>
+        <span class="hidden border-l border-pine/15 pl-3 sm:block">
+          <span class="block text-[12px] font-extrabold tracking-[.16em] text-pine">{{ clinic_name }}</span>
+          <span class="mt-1 block text-[8px] font-bold uppercase tracking-[.18em] text-muted">{{ clinic_tagline }}</span>
+        </span>
+      </a>
+
+      <nav class="hidden items-center gap-8 text-[11px] font-bold uppercase tracking-[.12em] text-pine/75 xl:flex" aria-label="Navegação principal">
+        <a class="nav-link transition hover:text-brass" href="#inicio">Início</a>
+        <a class="nav-link transition hover:text-brass" href="#filosofia">A clínica</a>
+        <a class="nav-link transition hover:text-brass" href="#cuidados">Cuidados</a>
+        <a class="nav-link transition hover:text-brass" href="#duvidas">Dúvidas</a>
+        <a class="nav-link transition hover:text-brass" href="#agendamento">Agendamento</a>
+      </nav>
+
+      <div class="hidden items-center gap-3 xl:flex">
+        <a href="{{ instagram_url }}" target="_blank" rel="noopener noreferrer" aria-label="Abrir Instagram da clínica" class="inline-flex h-10 items-center gap-2 rounded-full border border-pine/15 px-3 text-pine transition hover:border-brass hover:bg-surfaceAlt hover:text-brass">
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01" stroke-width="2.5" stroke-linecap="round"/></svg>
+          <span class="text-[9px] font-extrabold uppercase tracking-[.12em]">Instagram</span>
+        </a>
+        <div class="flex items-center rounded-full border border-pine/10 bg-surfaceAlt p-1" role="group" aria-label="Escolher paleta de cores">
+          <button type="button" data-theme-choice="light" class="theme-choice rounded-full border border-transparent px-3 py-2 text-[9px] font-extrabold uppercase tracking-[.08em] text-pine transition" aria-pressed="true">Branco</button>
+          <button type="button" data-theme-choice="dark" class="theme-choice rounded-full border border-transparent px-3 py-2 text-[9px] font-extrabold uppercase tracking-[.08em] text-pine transition" aria-pressed="false">Preto</button>
+        </div>
+      </div>
+
+      <button id="menu-button" class="flex h-11 w-11 items-center justify-center rounded-full border border-pine/15 text-pine transition hover:bg-surface xl:hidden" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu">
+        <svg id="menu-icon" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden border-t border-pine/10 bg-paper px-5 pb-5 pt-2 shadow-card xl:hidden">
+      <nav class="mx-auto flex max-w-[1440px] flex-col gap-1 text-[11px] font-extrabold uppercase tracking-[.13em] text-pine" aria-label="Menu móvel">
+        <a class="rounded-xl px-4 py-3 transition hover:bg-linen" href="#inicio">Início</a>
+        <a class="rounded-xl px-4 py-3 transition hover:bg-linen" href="#filosofia">A clínica</a>
+        <a class="rounded-xl px-4 py-3 transition hover:bg-linen" href="#cuidados">Cuidados</a>
+        <a class="rounded-xl px-4 py-3 transition hover:bg-linen" href="#duvidas">Dúvidas</a>
+        <a class="rounded-xl px-4 py-3 transition hover:bg-linen" href="#agendamento">Agendamento</a>
+        <a href="{{ instagram_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 rounded-xl px-4 py-3 text-brass transition hover:bg-linen" aria-label="Abrir Instagram da clínica">
+          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01" stroke-width="2.5" stroke-linecap="round"/></svg>
+          <span>Instagram da clínica ↗</span>
+        </a>
+        <div class="mt-2 rounded-xl bg-surfaceAlt p-3">
+          <span class="pl-1 text-[9px] font-extrabold uppercase tracking-[.12em] text-muted">Paleta de cores</span>
+          <div class="mt-2 flex w-full items-center rounded-full border border-pine/10 bg-surface p-1" role="group" aria-label="Escolher paleta de cores">
+            <button type="button" data-theme-choice="light" class="theme-choice flex-1 rounded-full border border-transparent px-2 py-2 text-[9px] font-extrabold text-pine" aria-pressed="true">Branco + amarelo</button>
+            <button type="button" data-theme-choice="dark" class="theme-choice flex-1 rounded-full border border-transparent px-2 py-2 text-[9px] font-extrabold text-pine" aria-pressed="false">Preto + amarelo</button>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO: composição editorial assimétrica -->
+    <section id="inicio" class="relative overflow-hidden bg-paper">
+      <div class="pointer-events-none absolute -left-48 top-16 h-[520px] w-[520px] rounded-full border border-brass/15"></div>
+      <div class="pointer-events-none absolute -left-32 top-32 h-[360px] w-[360px] rounded-full border border-brass/10"></div>
+      <div class="relative mx-auto grid max-w-[1440px] items-center gap-10 px-5 pb-16 pt-12 sm:px-8 sm:pb-20 sm:pt-16 lg:grid-cols-[.92fr_1.08fr] lg:gap-12 lg:px-14 lg:py-20">
+        <div class="relative z-10 max-w-[650px] py-4 lg:py-10">
+          <div class="mb-8 flex items-center gap-3">
+            <span class="h-px w-10 bg-brass"></span>
+            <p class="text-[10px] font-extrabold uppercase tracking-[.23em] text-brass">{{ clinic_tagline }}</p>
+          </div>
+          <h1 class="font-display text-[3.55rem] font-semibold leading-[.92] tracking-[-.035em] text-pine sm:text-7xl lg:text-[5.6rem] xl:text-[6.2rem]">
+            Um cuidado <span class="italic font-medium text-brass">atento.</span><br>
+            Um sorriso com<br><span class="relative inline-block">confiança<span class="absolute -bottom-1 left-0 h-[3px] w-[82%] bg-brass/55"></span></span><span class="text-brass">.</span>
+          </h1>
+          <p class="mt-8 max-w-[470px] text-[14px] leading-[1.95] text-muted sm:text-[15px]">
+            Odontologia com escuta, planejamento e atenção aos detalhes. Um espaço para entender suas necessidades e cuidar da sua saúde bucal com tranquilidade.
+          </p>
+          <div class="mt-12 flex items-center gap-5 border-t border-pine/10 pt-6 sm:mt-16">
+            <div class="flex -space-x-2">
+              <span class="flex h-9 w-9 items-center justify-center rounded-full border-2 border-paper bg-linen text-pine"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3 14.5 9.5 21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/></svg></span>
+              <span class="flex h-9 w-9 items-center justify-center rounded-full border-2 border-paper bg-linen text-pine"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-8-4.5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6.5-8 11-8 11Z"/></svg></span>
+            </div>
+            <p class="text-[10px] leading-5 text-muted">Mais do que tratar dentes,<br><strong class="font-extrabold text-pine">cuidar de pessoas.</strong></p>
+          </div>
+        </div>
+
+        <div class="relative mx-auto w-full max-w-[680px] lg:ml-auto">
+          <div class="absolute -right-3 -top-4 z-0 h-28 w-28 rounded-tr-[3rem] border-r border-t border-brass/70 sm:-right-5 sm:-top-6 sm:h-40 sm:w-40"></div>
+          <div class="hero-image image-grain relative z-10 min-h-[430px] overflow-hidden rounded-tl-[8rem] rounded-br-[8rem] bg-linen bg-cover bg-center shadow-card sm:min-h-[570px] sm:rounded-tl-[11rem] sm:rounded-br-[11rem] lg:min-h-[650px]">
+            <div class="absolute inset-0 bg-gradient-to-t from-pineDeep/55 via-transparent to-pineDeep/5"></div>
+            <div class="absolute bottom-0 left-0 right-0 flex flex-col justify-between gap-6 p-7 sm:flex-row sm:items-end sm:p-10">
+              <div class="max-w-[290px] text-white">
+                <p class="text-[9px] font-extrabold uppercase tracking-[.22em] text-brassLight">Uma experiência mais humana</p>
+                <p class="mt-3 font-display text-3xl leading-[1.05] sm:text-4xl">Atenção em cada etapa do seu cuidado.</p>
+              </div>
+              <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-white/45 bg-surface/10 text-white backdrop-blur-sm">
+                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M7 17 17 7M7 7h10v10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </div>
+          </div>
+          <div class="absolute -bottom-5 -left-3 z-20 flex items-center gap-4 rounded-2xl border border-pine/5 bg-surface px-5 py-4 shadow-float sm:-left-10 sm:bottom-8 sm:px-6 sm:py-5">
+            <span class="flex h-11 w-11 items-center justify-center rounded-full bg-linen text-brass"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3.5 19 6v5.5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-2.5Z"/><path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><strong class="block text-[11px] font-extrabold text-pine">Cuidado individualizado</strong><small class="mt-1 block text-[9px] text-muted">Cada sorriso tem sua própria história.</small></span>
+          </div>
+        </div>
+      </div>
+      <div class="hidden border-y border-pine/10 bg-surface/40 lg:block">
+        <div class="mx-auto flex max-w-[1440px] items-center justify-between px-14 py-4 text-[9px] font-extrabold uppercase tracking-[.2em] text-pine/55">
+          <span>Saúde bucal</span><span class="text-brass">✳</span><span>Estética e função</span><span class="text-brass">✳</span><span>Prevenção</span><span class="text-brass">✳</span><span>Bem-estar</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILOSOFIA -->
+    <section id="filosofia" class="relative overflow-hidden bg-surface py-24 sm:py-28 lg:py-32">
+      <div class="mx-auto grid max-w-[1440px] gap-14 px-5 sm:px-8 lg:grid-cols-[.92fr_1.08fr] lg:items-center lg:gap-24 lg:px-14">
+        <div class="reveal relative mx-auto w-full max-w-[560px] lg:mx-0">
+          <div class="clinic-image relative min-h-[420px] overflow-hidden rounded-[1.8rem] bg-linen bg-cover bg-center shadow-card sm:min-h-[570px]">
+            <div class="absolute inset-0 bg-gradient-to-t from-pineDeep/35 via-transparent to-transparent"></div>
+            <div class="absolute bottom-6 left-6 right-6 flex items-end justify-between text-white sm:bottom-8 sm:left-8 sm:right-8">
+              <p class="max-w-[230px] font-display text-3xl leading-none sm:text-4xl">Um ambiente pensado para acolher.</p>
+              <span class="mb-1 text-[9px] font-bold uppercase tracking-[.2em] text-white/75">DR / 01</span>
+            </div>
+          </div>
+          <div class="absolute -bottom-7 -right-4 h-28 w-28 rounded-full border border-brass/60 sm:-right-8 sm:h-40 sm:w-40"></div>
+          <div class="absolute -left-4 top-8 hidden h-20 w-20 rounded-full border border-brass/35 sm:block"></div>
+        </div>
+
+        <div class="reveal max-w-[610px] lg:py-8">
+          <div class="flex items-center gap-3"><span class="h-px w-9 bg-brass"></span><p class="text-[10px] font-extrabold uppercase tracking-[.22em] text-brass">A nossa filosofia</p></div>
+          <h2 class="mt-6 font-display text-[3.2rem] font-semibold leading-[.98] tracking-[-.025em] text-pine sm:text-6xl">A odontologia começa na <span class="italic font-medium text-brass">escuta.</span></h2>
+          <p class="mt-7 max-w-[520px] text-[13px] leading-[2] text-muted sm:text-sm">Acreditamos que um bom atendimento vai além do procedimento. É entender o que cada pessoa precisa, explicar com clareza e construir um plano de cuidado com responsabilidade.</p>
+          <div class="mt-10 grid gap-6 border-t border-pine/10 pt-8 sm:grid-cols-2">
+            <div class="flex gap-4">
+              <span class="font-display text-3xl text-brass">01</span>
+              <div><h3 class="text-[12px] font-extrabold text-pine">Escuta verdadeira</h3><p class="mt-2 text-[11px] leading-6 text-muted">Tempo para compreender suas expectativas e necessidades.</p></div>
+            </div>
+            <div class="flex gap-4">
+              <span class="font-display text-3xl text-brass">02</span>
+              <div><h3 class="text-[12px] font-extrabold text-pine">Orientação clara</h3><p class="mt-2 text-[11px] leading-6 text-muted">Informação acessível para decisões mais tranquilas.</p></div>
+            </div>
+            <div class="flex gap-4">
+              <span class="font-display text-3xl text-brass">03</span>
+              <div><h3 class="text-[12px] font-extrabold text-pine">Plano individual</h3><p class="mt-2 text-[11px] leading-6 text-muted">Cuidado definido de acordo com a avaliação profissional.</p></div>
+            </div>
+            <div class="flex gap-4">
+              <span class="font-display text-3xl text-brass">04</span>
+              <div><h3 class="text-[12px] font-extrabold text-pine">Acompanhamento</h3><p class="mt-2 text-[11px] leading-6 text-muted">Atenção ao processo, à prevenção e à continuidade do cuidado.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LINHA DE MARCA -->
+    <div class="bg-deep py-7 text-white">
+      <div class="mx-auto flex max-w-[1440px] flex-wrap items-center justify-center gap-x-7 gap-y-3 px-5 text-center text-[9px] font-extrabold uppercase tracking-[.2em] text-white/70 sm:gap-x-12 sm:text-[10px]">
+        <span>Precisão</span><span class="text-brassLight">✳</span><span>Acolhimento</span><span class="text-brassLight">✳</span><span>Confiança</span><span class="text-brassLight">✳</span><span>Saúde</span>
+      </div>
+    </div>
+
+    <!-- ÁREAS DE CUIDADO -->
+    <section id="cuidados" class="bg-paper py-24 sm:py-28 lg:py-32">
+      <div class="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-14">
+        <div class="reveal flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+          <div class="max-w-[650px]">
+            <div class="flex items-center gap-3"><span class="h-px w-9 bg-brass"></span><p class="text-[10px] font-extrabold uppercase tracking-[.22em] text-brass">Áreas de cuidado</p></div>
+            <h2 class="mt-6 font-display text-[3.2rem] font-semibold leading-[.98] tracking-[-.025em] text-pine sm:text-6xl">Cuidado completo.<br><span class="italic font-medium text-brass">Olhar individual.</span></h2>
+          </div>
+          <p class="max-w-[390px] text-[12px] leading-[1.9] text-muted sm:text-[13px]">Cada etapa é conduzida com orientação profissional e atenção às necessidades de cada paciente. A indicação dos procedimentos depende de avaliação clínica.</p>
+        </div>
+
+        <div class="mt-14 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <article class="reveal group relative min-h-[280px] overflow-hidden rounded-[1.4rem] border border-pine/10 bg-surface p-7 transition duration-500 hover:-translate-y-2 hover:shadow-card sm:min-h-[320px]">
+            <div class="flex items-center justify-between"><span class="font-display text-3xl text-brass">01</span><span class="flex h-11 w-11 items-center justify-center rounded-full bg-linen text-pine transition group-hover:bg-action group-hover:text-actionText"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3.5 19 6v5.5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-2.5Z"/><path d="M8.5 12h7M12 8.5v7" stroke-linecap="round"/></svg></span></div>
+            <div class="mt-14"><h3 class="font-display text-[2rem] font-semibold leading-none text-pine">Avaliação<br>odontológica</h3><p class="mt-4 text-[11px] leading-6 text-muted">Um momento para conhecer sua saúde bucal, conversar sobre suas queixas e planejar os próximos passos.</p></div>
+          </article>
+          <article class="reveal group relative min-h-[280px] overflow-hidden rounded-[1.4rem] border border-pine/10 bg-linen p-7 transition duration-500 hover:-translate-y-2 hover:shadow-card sm:min-h-[320px]">
+            <div class="flex items-center justify-between"><span class="font-display text-3xl text-brass">02</span><span class="flex h-11 w-11 items-center justify-center rounded-full bg-surface/80 text-pine transition group-hover:bg-action group-hover:text-actionText"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v18M3 12h18" stroke-linecap="round"/><circle cx="12" cy="12" r="8.5"/></svg></span></div>
+            <div class="mt-14"><h3 class="font-display text-[2rem] font-semibold leading-none text-pine">Prevenção<br>e manutenção</h3><p class="mt-4 text-[11px] leading-6 text-muted">Orientações e cuidados que ajudam a preservar a saúde dos dentes e das gengivas.</p></div>
+          </article>
+          <article class="reveal group relative min-h-[280px] overflow-hidden rounded-[1.4rem] border border-pine/10 bg-surfaceAlt p-7 transition duration-500 hover:-translate-y-2 hover:shadow-card sm:min-h-[320px]">
+            <div class="flex items-center justify-between"><span class="font-display text-3xl text-brass">03</span><span class="flex h-11 w-11 items-center justify-center rounded-full bg-surface/80 text-pine transition group-hover:bg-action group-hover:text-actionText"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 4.5c2-1 3 0 5 0s3-1 5 0c2 1 3 4 2 7l-2 7c-.4 1.4-1.3 2-2.3 1.5-1-.5-1.1-3.5-2.7-3.5s-1.7 3-2.7 3.5C8.3 21 7.4 20.4 7 19l-2-7c-1-3 0-6 2-7.5Z"/></svg></span></div>
+            <div class="mt-14"><h3 class="font-display text-[2rem] font-semibold leading-none text-pine">Tratamentos<br>restauradores</h3><p class="mt-4 text-[11px] leading-6 text-muted">Possibilidades para recuperar a estrutura e a função dos dentes, conforme diagnóstico.</p></div>
+          </article>
+          <article class="reveal group relative min-h-[280px] overflow-hidden rounded-[1.4rem] border border-pine/10 bg-deep p-7 text-white transition duration-500 hover:-translate-y-2 hover:shadow-card sm:min-h-[320px]">
+            <div class="flex items-center justify-between"><span class="font-display text-3xl text-brassLight">04</span><span class="flex h-11 w-11 items-center justify-center rounded-full bg-surface/10 text-brassLight transition group-hover:bg-brass group-hover:text-pine"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 14c2.5-5.5 13.5-5.5 16 0M6 16c3 3 9 3 12 0M8 10c1-2 2.5-3 4-3s3 1 4 3" stroke-linecap="round"/></svg></span></div>
+            <div class="mt-14"><h3 class="font-display text-[2rem] font-semibold leading-none">Estética<br>do sorriso</h3><p class="mt-4 text-[11px] leading-6 text-white/65">Alternativas para cuidar da harmonia do sorriso com planejamento e naturalidade.</p></div>
+          </article>
+        </div>
+        <p class="mt-5 text-[9px] leading-5 text-muted">As áreas acima são referências de conteúdo e devem ser ajustadas aos serviços efetivamente oferecidos pela clínica.</p>
+      </div>
+    </section>
+
+    <!-- PAINEL DE EXPERIÊNCIA -->
+    <section class="overflow-hidden bg-pineDeep text-white">
+      <div class="mx-auto grid max-w-[1440px] lg:grid-cols-[1fr_1fr]">
+        <div class="reveal relative flex min-h-[440px] flex-col justify-between overflow-hidden p-8 sm:p-12 lg:min-h-[580px] lg:p-16">
+          <div class="absolute -left-20 -top-20 h-80 w-80 rounded-full border border-white/10"></div><div class="absolute -left-4 -top-4 h-48 w-48 rounded-full border border-white/10"></div>
+          <div class="relative flex items-center gap-3"><span class="h-px w-9 bg-brassLight"></span><span class="text-[9px] font-extrabold uppercase tracking-[.22em] text-brassLight">A experiência DR ODONTO</span></div>
+          <div class="relative max-w-[500px] py-12"><p class="font-display text-[3.5rem] font-semibold leading-[.93] tracking-[-.025em] sm:text-6xl">O detalhe faz parte do <span class="italic font-medium text-brassLight">cuidado.</span></p><p class="mt-7 max-w-[380px] text-[12px] leading-[2] text-white/60">Da primeira conversa ao acompanhamento, cada etapa merece atenção. Nosso compromisso é que você compreenda o processo e se sinta acolhido.</p></div>
+          <div class="relative flex items-center justify-between border-t border-white/15 pt-5"><span class="text-[9px] font-bold uppercase tracking-[.18em] text-white/50">Cuidado em cada etapa</span><span class="font-display text-2xl text-brassLight">DR.</span></div>
+        </div>
+        <div class="doctor-image image-grain relative min-h-[380px] bg-linen bg-cover bg-center sm:min-h-[500px] lg:min-h-[580px]">
+          <div class="absolute inset-0 bg-gradient-to-r from-pineDeep/35 via-transparent to-pineDeep/10"></div>
+          <div class="absolute bottom-7 left-7 right-7 rounded-2xl border border-white/35 bg-pineDeep/55 p-5 text-white backdrop-blur-md sm:bottom-10 sm:left-10 sm:right-auto sm:max-w-[290px] sm:p-6">
+            <p class="text-[9px] font-extrabold uppercase tracking-[.2em] text-brassLight">Um sorriso é pessoal</p><p class="mt-3 font-display text-3xl leading-none">O cuidado também deve ser.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AGENDAMENTO / CONTATO -->
+    <section id="agendamento" class="relative overflow-hidden bg-linen py-24 sm:py-28 lg:py-32">
+      <div class="pointer-events-none absolute -right-40 top-0 h-[500px] w-[500px] rounded-full border border-brass/20"></div>
+      <div class="mx-auto grid max-w-[1440px] gap-12 px-5 sm:px-8 lg:grid-cols-[.82fr_1.18fr] lg:gap-20 lg:px-14">
+        <div class="reveal relative z-10 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-3"><span class="h-px w-9 bg-brass"></span><p class="text-[10px] font-extrabold uppercase tracking-[.22em] text-brass">Agendamento</p></div>
+            <h2 class="mt-6 font-display text-[3.4rem] font-semibold leading-[.95] tracking-[-.025em] text-pine sm:text-6xl">Vamos conversar sobre o seu <span class="italic font-medium text-brass">sorriso?</span></h2>
+            <p class="mt-7 max-w-[420px] text-[12px] leading-[2] text-muted sm:text-[13px]">Para agendar, fale diretamente com a equipe pelo WhatsApp. Assim, você pode tirar dúvidas e combinar o melhor horário.</p>
+          </div>
+          <div class="mt-12 space-y-5 border-t border-pine/15 pt-7">
+            {% if clinic_address %}
+            <div class="flex gap-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface text-brass"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.3"/></svg></span><div><p class="text-[9px] font-extrabold uppercase tracking-[.17em] text-muted">Endereço</p><p class="mt-1 max-w-[270px] text-[11px] leading-6 text-pine">{{ clinic_address }}</p></div></div>
+            {% endif %}
+            {% if clinic_hours %}
+            <div class="flex gap-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface text-brass"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2" stroke-linecap="round"/></svg></span><div><p class="text-[9px] font-extrabold uppercase tracking-[.17em] text-muted">Horários de atendimento</p><p class="mt-1 text-[11px] leading-6 text-pine">{{ clinic_hours }}</p></div></div>
+            {% endif %}
+            {% if clinic_phone %}
+            <div class="flex gap-4"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface text-brass"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 3.5h3l1.5 4-2 1.5a14 14 0 0 0 5.5 5.5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10 19 5 14 5 5.5c0-1.1.9-2 2-2Z" stroke-linejoin="round"/></svg></span><div><p class="text-[9px] font-extrabold uppercase tracking-[.17em] text-muted">Telefone</p><a href="tel:{{ clinic_phone|replace(' ', '')|replace('(', '')|replace(')', '')|replace('-', '') }}" class="mt-1 block text-[11px] font-bold text-pine hover:text-brass">{{ clinic_phone }}</a></div></div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="reveal relative z-10 flex flex-col justify-center rounded-[1.7rem] border border-white bg-surface p-7 shadow-card sm:p-10 lg:p-12">
+          <span class="text-[9px] font-extrabold uppercase tracking-[.2em] text-brass">Agendamento</span>
+          <h3 class="mt-4 font-display text-4xl font-semibold leading-[1.02] text-pine sm:text-5xl">Vamos encontrar o melhor horário para você.</h3>
+          <p class="mt-5 max-w-[430px] text-[12px] leading-[1.9] text-muted">Clique no botão abaixo para abrir uma conversa com a DR ODONTO. Nossa equipe dará continuidade ao atendimento e orientará sobre os horários disponíveis.</p>
+          {% if whatsapp_url %}
+          <a href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="group mt-8 inline-flex min-h-[58px] w-full items-center justify-center gap-3 rounded-full bg-[#16865b] px-6 text-[10px] font-extrabold uppercase tracking-[.14em] text-white shadow-float transition hover:-translate-y-1 hover:bg-[#116e49] focus:outline-none focus:ring-4 focus:ring-[#16865b]/20">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor" aria-hidden="true"><path d="M20.5 3.5A11.9 11.9 0 0 0 12.1 0C5.5 0 .2 5.3.2 11.9c0 2.1.6 4.2 1.7 6L0 24l6.3-1.7a12 12 0 0 0 5.8 1.5h.1c6.5 0 11.8-5.3 11.8-11.9 0-3.2-1.2-6.1-3.5-8.4ZM12.1 21.8c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7 1 1-3.6-.2-.4a9.8 9.8 0 1 1 8.3 4.6Z"/></svg>
+            Agendar pelo WhatsApp
+            <span class="text-base text-white/70 transition group-hover:translate-x-1">↗</span>
+          </a>
+          {% else %}
+          <span class="mt-8 inline-flex min-h-[58px] w-full items-center justify-center rounded-full bg-[#16865b]/15 px-6 text-center text-[10px] font-extrabold uppercase tracking-[.12em] text-pine" aria-disabled="true">Agendar pelo WhatsApp</span>
+          <p class="mt-3 text-center text-[10px] leading-5 text-muted">Para ativar o botão, configure o número oficial em <code>WHATSAPP_NUMBER</code>.</p>
+          {% endif %}
+          <p class="mt-4 text-center text-[9px] leading-5 text-muted">A conversa será aberta no WhatsApp com uma mensagem inicial pronta. Basta enviar para falar com a equipe.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="duvidas" class="bg-surface py-24 sm:py-28">
+      <div class="mx-auto grid max-w-[1440px] gap-12 px-5 sm:px-8 lg:grid-cols-[.72fr_1.28fr] lg:gap-24 lg:px-14">
+        <div class="reveal">
+          <div class="flex items-center gap-3"><span class="h-px w-9 bg-brass"></span><p class="text-[10px] font-extrabold uppercase tracking-[.22em] text-brass">Antes de agendar</p></div>
+          <h2 class="mt-6 font-display text-[3.2rem] font-semibold leading-[.98] tracking-[-.025em] text-pine sm:text-6xl">Dúvidas que podem surgir.</h2>
+          <p class="mt-6 max-w-[320px] text-[12px] leading-[2] text-muted">Informações rápidas para você conhecer melhor o atendimento da clínica.</p>
+        </div>
+        <div class="reveal divide-y divide-pine/10 border-y border-pine/10">
+          <details class="group py-6" open><summary class="flex cursor-pointer list-none items-center justify-between gap-6 text-[12px] font-extrabold text-pine sm:text-[13px]">Como faço para agendar?<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-pine/15 text-brass transition group-open:rotate-45">+</span></summary><p class="mt-4 max-w-[650px] text-[11px] leading-[1.9] text-muted">Use o botão “Agendar pelo WhatsApp” na seção de agendamento. A conversa será aberta diretamente com a clínica.</p></details>
+          <details class="group py-6"><summary class="flex cursor-pointer list-none items-center justify-between gap-6 text-[12px] font-extrabold text-pine sm:text-[13px]">O clique no botão confirma a consulta?<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-pine/15 text-brass transition group-open:rotate-45">+</span></summary><p class="mt-4 max-w-[650px] text-[11px] leading-[1.9] text-muted">Não. O botão inicia uma conversa. A equipe confirma a disponibilidade e combina o horário com você.</p></details>
+          <details class="group py-6"><summary class="flex cursor-pointer list-none items-center justify-between gap-6 text-[12px] font-extrabold text-pine sm:text-[13px]">Preciso escolher o tratamento antes de entrar em contato?<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-pine/15 text-brass transition group-open:rotate-45">+</span></summary><p class="mt-4 max-w-[650px] text-[11px] leading-[1.9] text-muted">Não. Você pode conversar sobre suas dúvidas. A indicação de tratamento depende de avaliação odontológica profissional.</p></details>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- RODAPÉ -->
+  <footer class="bg-pineDeep px-5 pb-7 pt-14 text-white sm:px-8 sm:pt-16 lg:px-14">
+    <div class="mx-auto grid max-w-[1440px] gap-10 border-b border-white/10 pb-10 sm:grid-cols-2 lg:grid-cols-[1.3fr_.7fr_1fr] lg:gap-16">
+      <div>
+        <a href="#inicio" class="inline-flex items-center gap-3" aria-label="Voltar ao início">
+          <span class="flex h-[48px] w-[112px] items-center justify-center overflow-hidden rounded-xl bg-surface"><img src="{{ url_for('static', filename='images/logo-dr-odonto.jpg') }}" alt="Logo {{ clinic_name }}" class="h-full w-full object-cover"></span>
+        </a>
+        <p class="mt-5 max-w-[300px] text-[11px] leading-[1.9] text-white/50">Odontologia especializada com atenção, clareza e cuidado individual em cada etapa.</p>
+      </div>
+      <div><p class="text-[9px] font-extrabold uppercase tracking-[.2em] text-brassLight">Explore</p><div class="mt-5 flex flex-col gap-3 text-[11px] font-semibold text-white/65"><a href="#filosofia" class="transition hover:text-white">A clínica</a><a href="#cuidados" class="transition hover:text-white">Áreas de cuidado</a><a href="#duvidas" class="transition hover:text-white">Perguntas frequentes</a></div></div>
+      <div><p class="text-[9px] font-extrabold uppercase tracking-[.2em] text-brassLight">Conecte-se</p><p class="mt-5 max-w-[300px] text-[11px] leading-[1.9] text-white/50">Acompanhe os canais oficiais da clínica e fale com nossa equipe.</p><div class="mt-4 flex flex-wrap gap-2">{% for social in social_links %}<a href="{{ social.url }}" target="_blank" rel="noopener noreferrer" class="rounded-full border border-white/15 px-4 py-2 text-[9px] font-bold uppercase tracking-[.1em] text-white/75 transition hover:border-brassLight hover:text-brassLight">{{ social.label }} ↗</a>{% endfor %}</div></div>
+    </div>
+    <div class="mx-auto flex max-w-[1440px] flex-col justify-between gap-3 pt-6 text-center text-[9px] text-white/35 sm:flex-row sm:text-left"><p>© <span id="year"></span> {{ clinic_name }}. Todos os direitos reservados.</p><p>Conteúdo institucional. As informações não substituem avaliação odontológica profissional.</p><a href="#inicio" class="font-bold uppercase tracking-[.12em] text-brassLight transition hover:text-white">Voltar ao topo ↑</a></div>
+  </footer>
+
+  <script>
+    // Alternância entre as duas identidades: branco + amarelo e preto + amarelo.
+    const themeMeta = document.getElementById('theme-color-meta');
+    const applyTheme = (theme, persist = true) => {
+      const normalized = theme === 'dark' ? 'dark' : 'light';
+      document.documentElement.dataset.theme = normalized;
+      document.querySelectorAll('[data-theme-choice]').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.themeChoice === normalized));
+      });
+      if (themeMeta) themeMeta.setAttribute('content', normalized === 'dark' ? '#10100f' : '#fffefa');
+      if (persist) {
+        try { localStorage.setItem('dr-odonto-theme', normalized); } catch (error) { /* armazenamento opcional */ }
+      }
+    };
+    applyTheme(document.documentElement.dataset.theme || 'light', false);
+    document.querySelectorAll('[data-theme-choice]').forEach(button => {
+      button.addEventListener('click', () => applyTheme(button.dataset.themeChoice));
+    });
+
+    // Menu móvel: fecha após a seleção e mantém aria-expanded sincronizado.
+    const menuButton = document.getElementById('menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    menuButton.addEventListener('click', () => {
+      const opening = mobileMenu.classList.contains('hidden');
+      mobileMenu.classList.toggle('hidden');
+      menuButton.setAttribute('aria-expanded', String(opening));
+      menuButton.setAttribute('aria-label', opening ? 'Fechar menu' : 'Abrir menu');
+    });
+    mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+      mobileMenu.classList.add('hidden');
+      menuButton.setAttribute('aria-expanded', 'false');
+      menuButton.setAttribute('aria-label', 'Abrir menu');
+    }));
+
+    // Sombra discreta na navegação depois do início da rolagem.
+    const header = document.getElementById('site-header');
+    const updateHeader = () => header.classList.toggle('shadow-[0_8px_30px_rgba(0,0,0,.08)]', window.scrollY > 16);
+    window.addEventListener('scroll', updateHeader, { passive: true });
+    updateHeader();
+
+    // Revelação suave das seções, respeitando usuários com movimento reduzido.
+    const revealItems = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      revealItems.forEach(item => observer.observe(item));
+    } else {
+      revealItems.forEach(item => item.classList.add('is-visible'));
+    }
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
