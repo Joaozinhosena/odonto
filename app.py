@@ -1,77 +1,591 @@
-"""DR ODONTO — institutional website built with Flask + Tailwind CDN."""
-
+import json
 import os
-import re
+import sys
 from pathlib import Path
-from urllib.parse import quote, urlparse
 
 from dotenv import load_dotenv
-from flask import Flask, render_template
+from flask import (
+    Flask,
+    Response,
+    send_from_directory,
+)
+from sqlalchemy import inspect, text
 
-# Carrega o .env da mesma pasta deste arquivo, independentemente de onde
-# o comando `python app.py` for executado.
-PROJECT_DIR = Path(__file__).resolve().parent
-load_dotenv(dotenv_path=PROJECT_DIR / ".env", override=False)
+BASE_DIR = Path(__file__).resolve().parent
+TEMPLATE_DIR = BASE_DIR / "templates"
+STATIC_DIR = BASE_DIR / "static"
 
-app = Flask(__name__)
+# No Vercel, o diretório do projeto (/var/task) é somente leitura.
+# /tmp é gravável, mas seu conteúdo é temporário e pode ser apagado
+# quando a instância serverless for encerrada ou reiniciada.
+IS_VERCEL = os.getenv("VERCEL") == "1"
 
+if IS_VERCEL:
+    INSTANCE_DIR = Path("/tmp/instance")
+else:
+    INSTANCE_DIR = BASE_DIR / "instance"
 
-def env_text(name: str, default: str = "") -> str:
-    """Read a trimmed environment value."""
-    return os.getenv(name, default).strip()
+UPLOAD_DIR = INSTANCE_DIR / "uploads"
+DATABASE_FILE = INSTANCE_DIR / "barber_pro.db"
 
-
-def digits_only(value: str) -> str:
-    return re.sub(r"\D", "", value or "")
-
-
-def valid_http_url(value: str) -> str:
-    """Only expose absolute HTTP(S) URLs in external links."""
-    value = (value or "").strip()
-    if not value:
-        return ""
-    parsed = urlparse(value)
-    return value if parsed.scheme in {"http", "https"} and parsed.netloc else ""
-
-
-@app.route("/")
-def index():
-    whatsapp_number = digits_only(env_text("WHATSAPP_NUMBER"))
-    message = quote("Olá! Gostaria de agendar uma consulta na DR ODONTO.", safe="")
-    # O link wa.me funciona tanto no celular quanto no computador e abre
-    # a conversa com o número já preenchido e a mensagem pronta.
-    whatsapp_url = (
-        f"https://wa.me/{whatsapp_number}?text={message}"
-        if len(whatsapp_number) >= 12
-        else ""
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(
+        0,
+        str(BASE_DIR),
     )
 
-    # Links oficiais informados pela clínica; podem ser sobrescritos no ambiente.
-    instagram_url = valid_http_url(env_text("INSTAGRAM_URL")) or "https://www.instagram.com/drodonto_varzea/"
-    social_links = [
-        {"label": "Instagram", "url": instagram_url, "icon": "instagram"},
-        {"label": "Facebook", "url": valid_http_url(env_text("FACEBOOK_URL")), "icon": "facebook"},
-        {"label": "TikTok", "url": valid_http_url(env_text("TIKTOK_URL")), "icon": "tiktok"},
-    ]
-    social_links = [item for item in social_links if item["url"]]
+load_dotenv(
+    BASE_DIR / ".env"
+)
 
-    return render_template(
-        "index.html",
-        clinic_name=env_text("CLINIC_NAME", "DR ODONTO"),
-        clinic_tagline=env_text("CLINIC_TAGLINE", "Odontologia especializada"),
-        clinic_address=env_text("CLINIC_ADDRESS"),
-        clinic_hours=env_text("CLINIC_HOURS"),
-        clinic_phone=env_text("CLINIC_PHONE"),
-        whatsapp_url=whatsapp_url,
-        instagram_url=instagram_url,
-        social_links=social_links,
+from app.extensions import (
+    db,
+    login_manager,
+    socketio,
+)
+from app.models import User
+from app.utils import get_csrf_token
+
+# Importa modelos extras antes de db.create_all().
+from app.whatsapp_models import (
+    WhatsAppNotification,
+    WhatsAppPreference,
+)
+from app.email_models import (
+    PendingRegistration,
+)
+
+
+def _env_bool(
+    name,
+    default=False,
+):
+    raw = os.getenv(
+        name
     )
+
+    if raw is None:
+        return default
+
+    return (
+        raw.strip().lower()
+        in {
+            "1",
+            "true",
+            "yes",
+            "sim",
+            "on",
+        }
+    )
+
+
+def _ensure_runtime_columns(application):
+    """
+    Migração simples e idempotente para instalações já existentes.
+
+    db.create_all() cria colunas apenas em tabelas novas. Esta rotina
+    acrescenta as colunas necessárias quando a tabela já existia antes
+    da atualização, preservando os dados atuais.
+    """
+    dialect = db.engine.dialect.name
+
+    if dialect == "postgresql":
+        bool_default = "FALSE"
+        datetime_type = "TIMESTAMP"
+    else:
+        bool_default = "0"
+        datetime_type = "DATETIME"
+
+    def add_column_if_missing(table_name, column_name, sql_definition):
+        inspector = inspect(db.engine)
+
+        if table_name not in inspector.get_table_names():
+            return
+
+        existing_columns = {
+            column["name"]
+            for column in inspector.get_columns(table_name)
+        }
+
+        if column_name in existing_columns:
+            return
+
+        statement = (
+            f"ALTER TABLE {table_name} "
+            f"ADD COLUMN {column_name} {sql_definition}"
+        )
+
+        with db.engine.begin() as connection:
+            connection.execute(text(statement))
+
+        application.logger.info(
+            "Migração: coluna %s.%s criada.",
+            table_name,
+            column_name,
+        )
+
+    add_column_if_missing(
+        "users",
+        "telefone",
+        "VARCHAR(20)",
+    )
+
+    add_column_if_missing(
+        "users",
+        "is_vip",
+        f"BOOLEAN NOT NULL DEFAULT {bool_default}",
+    )
+
+    add_column_if_missing(
+        "users",
+        "vip_since",
+        datetime_type,
+    )
+
+    add_column_if_missing(
+        "appointments",
+        "lembrete_enviado",
+        f"BOOLEAN NOT NULL DEFAULT {bool_default}",
+    )
+
+
+def create_app():
+    INSTANCE_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    UPLOAD_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    application = Flask(
+        __name__,
+        template_folder=str(
+            TEMPLATE_DIR
+        ),
+        static_folder=str(
+            STATIC_DIR
+        ),
+        static_url_path="/static",
+        instance_path=str(
+            INSTANCE_DIR
+        ),
+    )
+
+    database_url = os.getenv(
+        "DATABASE_URL",
+        "",
+    ).strip()
+
+    if not database_url:
+        database_url = (
+            f"sqlite:///"
+            f"{DATABASE_FILE.resolve().as_posix()}"
+        )
+
+    application.config.update(
+        SECRET_KEY=os.getenv(
+            "SECRET_KEY",
+            "dev-change-this-key",
+        ),
+
+        SQLALCHEMY_DATABASE_URI=
+            database_url,
+
+        SQLALCHEMY_TRACK_MODIFICATIONS=
+            False,
+
+        MAX_CONTENT_LENGTH=
+            4 * 1024 * 1024,
+
+        UPLOAD_FOLDER=
+            str(UPLOAD_DIR),
+
+        APP_NAME=os.getenv(
+            "APP_NAME",
+            "",
+        ).strip(),
+
+        VAPID_PUBLIC_KEY=os.getenv(
+            "VAPID_PUBLIC_KEY",
+            "",
+        ).strip(),
+
+        VAPID_PRIVATE_KEY=os.getenv(
+            "VAPID_PRIVATE_KEY",
+            "",
+        ).strip(),
+
+        VAPID_CLAIMS_EMAIL=os.getenv(
+            "VAPID_CLAIMS_EMAIL",
+            "",
+        ).strip(),
+
+        WHATSAPP_ACCESS_TOKEN=os.getenv(
+            "WHATSAPP_ACCESS_TOKEN",
+            "",
+        ).strip(),
+
+        WHATSAPP_PHONE_NUMBER_ID=os.getenv(
+            "WHATSAPP_PHONE_NUMBER_ID",
+            "",
+        ).strip(),
+
+        WHATSAPP_API_VERSION=os.getenv(
+            "WHATSAPP_API_VERSION",
+            "",
+        ).strip(),
+
+        WHATSAPP_CONFIRMATION_TEMPLATE=os.getenv(
+            "WHATSAPP_CONFIRMATION_TEMPLATE",
+            "",
+        ).strip(),
+
+        WHATSAPP_REMINDER_TEMPLATE=os.getenv(
+            "WHATSAPP_REMINDER_TEMPLATE",
+            "",
+        ).strip(),
+
+        WHATSAPP_TEMPLATE_LANGUAGE=os.getenv(
+            "WHATSAPP_TEMPLATE_LANGUAGE",
+            "pt_BR",
+        ).strip(),
+
+        WHATSAPP_REMINDER_MINUTES=int(
+            os.getenv(
+                "WHATSAPP_REMINDER_MINUTES",
+                "60",
+            )
+        ),
+
+        META_APP_SECRET=os.getenv(
+            "META_APP_SECRET",
+            "",
+        ).strip(),
+
+        WHATSAPP_WEBHOOK_VERIFY_TOKEN=os.getenv(
+            "WHATSAPP_WEBHOOK_VERIFY_TOKEN",
+            "",
+        ).strip(),
+
+        WHATSAPP_REMINDER_CHECK_SECONDS=int(
+            os.getenv(
+                "WHATSAPP_REMINDER_CHECK_SECONDS",
+                "60",
+            )
+        ),
+
+        # ====================================================
+        # E-MAIL / VERIFICAÇÃO DE CADASTRO
+        # ====================================================
+
+        MAIL_SERVER=os.getenv(
+            "MAIL_SERVER",
+            "smtp.gmail.com",
+        ).strip(),
+
+        MAIL_PORT=int(
+            os.getenv(
+                "MAIL_PORT",
+                "587",
+            )
+        ),
+
+        MAIL_USE_TLS=_env_bool(
+            "MAIL_USE_TLS",
+            True,
+        ),
+
+        MAIL_USE_SSL=_env_bool(
+            "MAIL_USE_SSL",
+            False,
+        ),
+
+        MAIL_USERNAME=os.getenv(
+            "MAIL_USERNAME",
+            "",
+        ).strip(),
+
+        MAIL_PASSWORD=os.getenv(
+            "MAIL_PASSWORD",
+            "",
+        ).strip(),
+
+        MAIL_FROM=os.getenv(
+            "MAIL_FROM",
+            os.getenv(
+                "MAIL_USERNAME",
+                "",
+            ),
+        ).strip(),
+
+        MAIL_FROM_NAME=os.getenv(
+            "MAIL_FROM_NAME",
+            os.getenv(
+                "APP_NAME",
+                "Gringo du Corte",
+            ),
+        ).strip(),
+
+        MAIL_CODE_EXPIRES_MINUTES=int(
+            os.getenv(
+                "MAIL_CODE_EXPIRES_MINUTES",
+                "10",
+            )
+        ),
+
+        MAIL_CODE_RESEND_SECONDS=int(
+            os.getenv(
+                "MAIL_CODE_RESEND_SECONDS",
+                "60",
+            )
+        ),
+
+        MAIL_CODE_MAX_ATTEMPTS=int(
+            os.getenv(
+                "MAIL_CODE_MAX_ATTEMPTS",
+                "5",
+            )
+        ),
+
+        MAIL_TIMEOUT_SECONDS=int(
+            os.getenv(
+                "MAIL_TIMEOUT_SECONDS",
+                "20",
+            )
+        ),
+    )
+
+    db.init_app(
+        application
+    )
+
+    login_manager.init_app(
+        application
+    )
+
+    socketio.init_app(
+        application,
+        async_mode="threading",
+        cors_allowed_origins="*",
+        logger=False,
+        engineio_logger=False,
+    )
+
+
+
+
+
+    from app.admin_stats import bp as admin_stats_bp
+
+
+
+    from app.auth import (
+        bp as auth_bp,
+    )
+    from app.booking import (
+        bp as booking_bp,
+    )
+    from app.admin import (
+        bp as admin_bp,
+    )
+    from app.whatsapp_routes import (
+        bp as whatsapp_bp,
+    )
+    from app.whatsapp_webhook import (
+        bp as whatsapp_webhook_bp,
+    )
+
+    application.register_blueprint(
+        admin_stats_bp,
+        name="admin_stats",
+    )
+
+    application.register_blueprint(
+        whatsapp_webhook_bp,
+        name="whatsapp_webhook",
+    )
+
+    application.register_blueprint(
+        auth_bp,
+        name="auth",
+    )
+
+    application.register_blueprint(
+        booking_bp,
+        name="booking",
+    )
+
+    application.register_blueprint(
+        admin_bp,
+        name="admin",
+    )
+
+    application.register_blueprint(
+        whatsapp_bp,
+        name="whatsapp",
+    )
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        try:
+            return db.session.get(
+                User,
+                int(user_id),
+            )
+        except (
+            TypeError,
+            ValueError,
+        ):
+            return None
+
+    @application.context_processor
+    def inject_globals():
+        return {
+            "csrf_token":
+                get_csrf_token,
+            "app_name":
+                application.config[
+                    "APP_NAME"
+                ],
+            "vapid_public_key":
+                application.config[
+                    "VAPID_PUBLIC_KEY"
+                ],
+        }
+
+    @application.template_filter(
+        "money"
+    )
+    def money(value_cents):
+        try:
+            cents = int(
+                value_cents
+                or 0
+            )
+        except (
+            TypeError,
+            ValueError,
+        ):
+            cents = 0
+
+        return (
+            f"R$ {cents / 100:,.2f}"
+            .replace(",", "X")
+            .replace(".", ",")
+            .replace("X", ".")
+        )
+
+    @application.get(
+        "/uploads/<path:filename>"
+    )
+    def uploaded_file(filename):
+        return send_from_directory(
+            application.config[
+                "UPLOAD_FOLDER"
+            ],
+            filename,
+        )
+
+    @application.get(
+        "/service-worker.js"
+    )
+    def service_worker():
+        app_name_json = (
+            json.dumps(
+                application.config.get(
+                    "APP_NAME",
+                    "",
+                )
+            )
+        )
+
+        code = """
+self.addEventListener("push", (event) => {
+    let data = {
+        title: __APP_NAME__,
+        body: "",
+        url: "/dashboard"
+    };
+
+    if (event.data) {
+        try {
+            data = event.data.json();
+        } catch (_) {}
+    }
+
+    event.waitUntil(
+        self.registration.showNotification(
+            data.title || __APP_NAME__,
+            {
+                body: data.body || "",
+                data: {
+                    url: data.url || "/dashboard"
+                }
+            }
+        )
+    );
+});
+
+self.addEventListener("notificationclick", (event) => {
+    event.notification.close();
+
+    const url =
+        (event.notification.data && event.notification.data.url)
+        || "/dashboard";
+
+    event.waitUntil(
+        clients.openWindow(url)
+    );
+});
+""".replace(
+            "__APP_NAME__",
+            app_name_json,
+        )
+
+        return Response(
+            code,
+            mimetype=
+                "application/javascript",
+            headers={
+                "Cache-Control":
+                    "no-cache, no-store, must-revalidate",
+                "Service-Worker-Allowed":
+                    "/",
+            },
+        )
+
+    with application.app_context():
+        db.create_all()
+        _ensure_runtime_columns(application)
+
+    return application
+
+
+app = create_app()
 
 
 if __name__ == "__main__":
-    # Debug fica desligado por padrão. Ative apenas durante o desenvolvimento.
-    app.run(
-        host="0.0.0.0",
-        port=int(env_text("PORT", "5000")),
-        debug=env_text("FLASK_DEBUG", "0") == "1",
+    from app.reminders import (
+        start_reminder_worker,
+    )
+
+    start_reminder_worker(
+        app
+    )
+
+    print(
+        "Servidor: "
+        "http://127.0.0.1:5000"
+    )
+
+    socketio.run(
+        app,
+        host="127.0.0.1",
+        port=5000,
+        debug=True,
+        use_reloader=False,
+        allow_unsafe_werkzeug=True,
     )
